@@ -114,8 +114,8 @@ func HandleArg() (string, string, int, error){
 
 func Help() bool {
 	if len(os.Args) == 2 && strings.EqualFold(os.Args[1], "help") {
-		logs.Debug("Uage: searchTarget targetFileName checkFileName, searchType")
-		logs.Debug("1: SEARCH_NO_MATCH 2:SEARCH_MATCH")
+		logs.Debug("Usage: searchTarget [targetFileName checkFileName searchType]")
+		logs.Debug("searchType have two values 1: SEARCH_NO_MATCH 2:SEARCH_MATCH")
 		return true
 	}
 	return false
