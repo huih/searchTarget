@@ -8,6 +8,7 @@ import (
 	"os"
 	"github.com/gotools/logs"
 	"github.com/gotools/files"
+	"errors"
 )
 
 const (
@@ -92,7 +93,7 @@ func HandleArg() (string, string, int, error){
 	
 	if len(os.Args) > 1 && len(os.Args) < 4 {
 		logs.Debug("usage searchTarget error, please use help")
-		return "", "", 0, error.New("usage error")
+		return "", "", 0, errors.New("usage error")
 	}
 	if len(os.Args) >= 4 {
 		searchType, err = strconv.Atoi(os.Args[3])
