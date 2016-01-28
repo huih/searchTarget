@@ -83,16 +83,61 @@ func SearchNoMatch(f *os.File, targetArray []string) {
 	}
 }
 
+func HandleArg() (string, string, int, error){
+	targetFile := "target.txt"
+	checkFile := "source.txt"
+	searchType := SEARCH_NO_MATCH
+	
+	var err error
+	
+	if len(os.Args) > 1 && len(os.Args) < 4 {
+		logs.Debug("usage searchTarget error, please use help")
+		return "", "", 0, error.New("usage error")
+	}
+	if len(os.Args) >= 4 {
+		searchType, err = strconv.Atoi(os.Args[3])
+		if err == nil {
+			targetFile = os.Args[1]
+			checkFile = os.Args[2]
+		} else {
+			searchType = SEARCH_NO_MATCH
+		}
+	}
+	
+	typeStr := "SEARCH_NO_MATCH"
+	if searchType == SEARCH_MATCH {
+		typeStr = "SEARCH_MATCH"
+	}
+	logs.Debug("targetFileName:%s, checkFileName:%s, searchType:%s", targetFile, checkFile, typeStr)	
+	return targetFile, checkFile, searchType, nil
+}
+
+func Help() bool {
+	if len(os.Args) == 2 && strings.EqualFold(os.Args[1], "help") {
+		logs.Debug("Uage: searchTarget targetFileName checkFileName, searchType")
+		logs.Debug("1: SEARCH_NO_MATCH 2:SEARCH_MATCH")
+		return true
+	}
+	return false
+}
+
 func main() {
-	searchType := SEARCH_MATCH
-	fileName := "target.txt"
+	
+	if Help() {
+		return
+	}
+	
+	fileName, sourceName, searchType, err := HandleArg()
+	if err != nil {
+		return
+	}
+	
 	targetArray, err := file.ReadFile(fileName)
 	if err != nil {
 		logs.Debug("open file(%s) error:%s", fileName, err.Error())
 		return
 	}
 	
-	sourceName := "source.txt"
 	sourceFile, err := os.Open(sourceName)
 	if err != nil {
 		logs.Debug("open file(%s) error: %s", sourceName, err.Error())
