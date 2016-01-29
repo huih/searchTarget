@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 	"io"
 	"strings"
@@ -17,7 +18,7 @@ const (
 	SEARCH_NO_MATCH_UP = 3
 )
 
-func SearchMatch(f *os.File, targetArray []string) {
+func SearchMatch(f *os.File, targetArray []string, checkfile string) {
 	sourceBuf := bufio.NewReader(f)
 	
 	index := 0
@@ -32,7 +33,7 @@ func SearchMatch(f *os.File, targetArray []string) {
 		lineNo = lineNo + 1
 		
 		if strings.Contains(line, targetArray[index]) {
-			line = strconv.Itoa(lineNo) + ": " + line
+			line = fmt.Sprintf("%s:%d %s", checkfile, lineNo, line)
 			resultArray[index] = line
 			index = index + 1
 			
@@ -50,7 +51,7 @@ func SearchMatch(f *os.File, targetArray []string) {
 	}
 }
 
-func SearchNoMatch(f *os.File, targetArray []string) {
+func SearchNoMatch(f *os.File, targetArray []string, checkfile string) {
 	sourceBuf := bufio.NewReader(f)
 	
 	index := 0
@@ -64,7 +65,7 @@ func SearchNoMatch(f *os.File, targetArray []string) {
 		}
 		lineNo = lineNo + 1
 		
-		line = strconv.Itoa(lineNo) + ": " + line
+		line = fmt.Sprintf("%s:%d %s", checkfile, lineNo, line)
 		if strings.Contains(line, targetArray[index]) {	
 			resultArray[index] = line
 			index = index + 1
@@ -85,7 +86,7 @@ func SearchNoMatch(f *os.File, targetArray []string) {
 	}
 }
 
-func SearchNoMatchUp(f *os.File, targetArray []string) {
+func SearchNoMatchUp(f *os.File, targetArray []string, checkfile string) {
 	sourceBuf := bufio.NewReader(f)
 	
 	index := 0
@@ -99,7 +100,7 @@ func SearchNoMatchUp(f *os.File, targetArray []string) {
 		}
 		lineNo = lineNo + 1
 		
-		line = strconv.Itoa(lineNo) + ": " + line
+		line = fmt.Sprintf("%s:%d %s", checkfile, lineNo, line)
 		if index == 0 && strings.Contains(line, targetArray[index]) == false  {	
 			resultArray[index] = line
 			index = index + 1
@@ -146,7 +147,8 @@ func HandleArg() (string, string, int, error){
 	} else if searchType == SEARCH_NO_MATCH_UP {
 		typeStr = "SEARCH_NO_MATCH_UP"
 	}
-	logs.Debug("targetFileName:%s, checkFileName:%s, searchType:%s", targetFile, checkFile, typeStr)	
+	
+	logs.Debug("targetFileName:%s, checkFileName:%s, searchType:%s\n", targetFile, checkFile, typeStr)	
 	return targetFile, checkFile, searchType, nil
 }
 
@@ -161,6 +163,7 @@ func Help() bool {
 
 func main() {
 	
+	logs.SetUsePrefix(false)
 	if Help() {
 		return
 	}
@@ -183,14 +186,13 @@ func main() {
 	}
 	defer sourceFile.Close()
 	
-	
 	switch searchType {
 		case SEARCH_NO_MATCH:
-			SearchNoMatch(sourceFile, targetArray)
+			SearchNoMatch(sourceFile, targetArray, sourceName)
 		case SEARCH_MATCH:
-			SearchMatch(sourceFile, targetArray)
+			SearchMatch(sourceFile, targetArray, sourceName)
 		case SEARCH_NO_MATCH_UP:
-			SearchNoMatchUp(sourceFile, targetArray)
+			SearchNoMatchUp(sourceFile, targetArray, sourceName)
 		default:
 			logs.Debug("no match search type")
 	}
