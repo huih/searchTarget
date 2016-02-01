@@ -9,6 +9,7 @@ import (
 	"os"
 	"github.com/gotools/logs"
 	"github.com/gotools/files"
+	"github.com/gotools/lists/fixedlist"
 	"errors"
 )
 
@@ -16,6 +17,7 @@ const (
 	SEARCH_NO_MATCH = 1
 	SEARCH_MATCH = 2
 	SEARCH_NO_MATCH_UP = 3
+	SEARCH_MATCH_GREP_LINE = 4
 )
 
 func SearchMatch(f *os.File, targetArray []string, checkfile string) {
@@ -92,6 +94,11 @@ func SearchNoMatchUp(f *os.File, targetArray []string, checkfile string) {
 	index := 0
 	lineNo := 0
 	
+	if len(targetArray) < 2 {
+		logs.Debug("the target string must exceed two lines or two lines.")
+		return
+	}
+	
 	resultArray := make([]string, len(targetArray))
 	for {
 		line, err := sourceBuf.ReadString('\n')
@@ -116,6 +123,86 @@ func SearchNoMatchUp(f *os.File, targetArray []string, checkfile string) {
 			index = 0
 		} else {
 			index = 0
+		}
+	}
+}
+
+func SearchMatchGrepLine(f *os.File, targetArray []string, checkfile string) {
+	
+	//read the number of line from args
+	lineNum := 1
+	if len(os.Args) >= 5 {
+		lineNum,_ = strconv.Atoi(os.Args[4])
+	}
+	if lineNum <= 0 {
+		lineNum = 1
+	}
+	
+	sourceBuf := bufio.NewReader(f)
+	
+	index := 0
+	lineNo := 0
+	
+	fixedList := fixedlist.New(len(targetArray) + lineNum)
+	bakFixedList := fixedlist.New(lineNum)
+	
+	for {
+		line, err := sourceBuf.ReadString('\n')
+		if err != nil || io.EOF == err {
+			break
+		}
+		lineNo = lineNo + 1
+		
+		line = fmt.Sprintf("%s:%d %s", checkfile, lineNo, line)
+		if strings.Contains(line, targetArray[index]) {
+			index = index + 1
+			fixedList.Add(line)
+		} else {
+			fixedList.Add(line)
+			index = 0
+		}
+		
+		if index < len (targetArray) {
+			continue
+		}
+		
+		if index >= len(targetArray) {
+			tmpLineNum := 0
+			for {
+				//read lineNum line to bakFixedList
+				line, err := sourceBuf.ReadString('\n')
+				if err != nil || io.EOF == err {//read finished
+					break	
+				}
+				lineNo = lineNo + 1
+				line = fmt.Sprintf("%s:%d %s", checkfile, lineNo, line)
+				bakFixedList.Add(line)
+				tmpLineNum = tmpLineNum + 1
+				if tmpLineNum >= lineNum {
+					break
+				}
+			}
+		}
+		
+		if (index >= len(targetArray)) {
+			//print fixedList comment
+			for {
+				v := fixedList.PopFront()
+				if v == nil {
+					break
+				}
+				logs.Debug("%s", v)
+			}
+			
+			//print bakFixedList comment
+			for {
+				v := bakFixedList.PopFront()
+				if v == nil {
+					break
+				}
+				logs.Debug("%s", v)
+				fixedList.Add(v)
+			}
 		}
 	}
 }
@@ -155,7 +242,7 @@ func HandleArg() (string, string, int, error){
 func Help() bool {
 	if len(os.Args) == 2 && strings.EqualFold(os.Args[1], "help") {
 		logs.Debug("Usage: searchTarget [targetFileName checkFileName searchType]")
-		logs.Debug("searchType have two values 1: SEARCH_NO_MATCH 2:SEARCH_MATCH 3:SEARCH_NO_MATCH_UP")
+		logs.Debug("searchType have two values 1: SEARCH_NO_MATCH 2:SEARCH_MATCH 3:SEARCH_NO_MATCH_UP 4:SEARCH_MATCH_GREP_LINE")
 		return true
 	}
 	return false
@@ -193,7 +280,10 @@ func main() {
 			SearchMatch(sourceFile, targetArray, sourceName)
 		case SEARCH_NO_MATCH_UP:
 			SearchNoMatchUp(sourceFile, targetArray, sourceName)
+		case SEARCH_MATCH_GREP_LINE:
+			SearchMatchGrepLine(sourceFile, targetArray, sourceName)
 		default:
 			logs.Debug("no match search type")
 	}
+	
 }
