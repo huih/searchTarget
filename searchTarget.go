@@ -130,6 +130,7 @@ func SearchNoMatchUp(f *os.File, targetArray []string, checkfile string) {
 func SearchMatchGrepLine(f *os.File, targetArray []string, checkfile string) {
 	
 	//read the number of line from args
+	printNum := 1
 	lineNum := 1
 	if len(os.Args) >= 5 {
 		lineNum,_ = strconv.Atoi(os.Args[4])
@@ -186,6 +187,8 @@ func SearchMatchGrepLine(f *os.File, targetArray []string, checkfile string) {
 		
 		if (index >= len(targetArray)) {
 			//print fixedList comment
+			logs.Debug("xxxxxxxxxxxxxx%d timesxxxxxxxxxxxx", printNum)
+			printNum = printNum + 1
 			for {
 				v := fixedList.PopFront()
 				if v == nil {
