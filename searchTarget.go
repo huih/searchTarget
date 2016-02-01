@@ -168,7 +168,7 @@ func SearchMatchGrepLine(f *os.File, targetArray []string, checkfile string) {
 		}
 		
 		if index >= len(targetArray) {
-			tmpLineNum := 0
+			tmpLineNum := 1
 			for {
 				//read lineNum line to bakFixedList
 				line, err := sourceBuf.ReadString('\n')
@@ -187,7 +187,7 @@ func SearchMatchGrepLine(f *os.File, targetArray []string, checkfile string) {
 		
 		if (index >= len(targetArray)) {
 			//print fixedList comment
-			logs.Debug("xxxxxxxxxxxxxx%d timesxxxxxxxxxxxx", printNum)
+			logs.Debug("xxxxxxxxxxxxxx%d timesxxxxxxxxxxxx\n", printNum)
 			printNum = printNum + 1
 			for {
 				v := fixedList.PopFront()
