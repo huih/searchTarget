@@ -245,8 +245,9 @@ func HandleArg() (string, string, int, error){
 
 func Help() bool {
 	if len(os.Args) == 2 && strings.EqualFold(os.Args[1], "help") {
-		logs.Debug("Usage: searchTarget [targetFileName checkFileName searchType]")
+		logs.Debug("Usage: searchTarget [targetFileName checkFileName searchType][line num]")
 		logs.Debug("searchType have two values 1: SEARCH_NO_MATCH 2:SEARCH_MATCH 3:SEARCH_NO_MATCH_UP 4:SEARCH_MATCH_GREP_LINE")
+		logs.Debug("when use SEARCH_MATCH_GREP_LINE searchType, need line num parameter")
 		return true
 	}
 	return false
