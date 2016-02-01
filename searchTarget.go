@@ -204,6 +204,7 @@ func SearchMatchGrepLine(f *os.File, targetArray []string, checkfile string) {
 				fixedList.Add(v)
 			}
 		}
+		index = 0
 	}
 }
 
